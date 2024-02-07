@@ -1,5 +1,5 @@
 import math
-import re
+import inspect as ins
 
 def translateByLabels(lst):
     res = []
@@ -13,65 +13,27 @@ def valueKnown(label, value):
 def getClassNameByLabel(label: str):
     return FIGURES[label].__class__.__name__
 
-GOAL = ""
-prevGoal = ""
 
 
-def find(toFind: str):
-    """
-    find - This function is used to find a specific element or the area of a figure.
+
+def find(target: str, attr: str):
+
+    targetType = getClassNameByLabel(target)
+    parentFigures = []
     
-    Parameters:
-        toFind (str): The element or figure to be found.
+    match targetType:
+        case "Segment":
+            attr = "length"
+
+            for figure in FIGURES:
+                if(isinstance(FIGURES[figure], Polygon)):
+                    parentFigures.append(figure)
+        
+        case "Angle":
+            attr = "angle"
+            pass
     
-    Returns:
-        None
-    """
-
-    global GOAL, prevGoal
-    if GOAL == "":
-        GOAL = toFind
-        print("Goal = " + GOAL)
-
-    if prevGoal == "":
-        prevGoal = toFind
-    print("prevGoal = " + prevGoal)
-
-
-    if getClassNameByLabel(toFind) in ["Segment", "Angle"]:
-        print("Finding " + toFind)
-        
-        potentialFigures = []
-
-        for potentialFigure in FIGURES:
-            try:
-                if len(potentialFigure) > 2 and set(toFind).issubset(set(potentialFigure)): 
-                    potentialFigures.append(potentialFigure)
-                    way = FIGURES[potentialFigure].findElementMethod(toFind)
-            
-            except RecursionError:
-                continue
-
-# re.match(r'^S\(.+\)$', toFind) is not None
-        
-    else:
-        print("Finding area of " + toFind)
-        way = FIGURES[toFind].findElementMethod(toFind)
-
-    if(way.__class__ == list):
-            print(f"Need to find {way}")
-            
-            for need in way:
-                find(need)
-
-    else:
-        print(f"Done! {toFind} = {way}")
-
-        if toFind == GOAL:
-            print(f"COMPLETED! Answer is {way}")
-        else:
-            find(prevGoal)
-
+    
 
 FIGURES = {}
 
@@ -91,7 +53,7 @@ class Polygon():
 
         FIGURES[label] = self
 
-
+        # инициализация всех сторон
         for i in range(len(self.label)):
             for j in range(i+1, len(self.label)):
                 char1 = self.label[i]
@@ -99,37 +61,24 @@ class Polygon():
                 Segment(char1+char2)
                 self.sides.append(char1+char2)
 
+        # пути получения данных
         self.ways = {
             "Angle": [],
             "Segment": [],
             "Area": []
         }
 
-    def findElementMethod(self, toFind):
-        if(FIGURES[toFind] == self):
-            for method in self.ways["Area"]:
-                print(f"Using {method} in {self.label}")
-                result = eval(f"self.{method}()")
-
-        else:
-            for method in self.ways[getClassNameByLabel(toFind)]:
-                print(f"Using {method} in {self.label}")
-                result = eval(f"self.{method}('{toFind}')")
-
-        return result
-
 class Triangle(Polygon):
     def __init__(self, label):
         super().__init__(label)
 
 class isoscelesTriangle(Triangle):
-    def __init__(self, label, baseSide):
+    def __init__(self, label: str, baseSide: str):
         super().__init__(label)
-        Segment(baseSide)
         self.baseSide = baseSide
 
 class rightTriangle(Triangle):
-    def __init__(self, label, rightVertex):
+    def __init__(self, label: str, rightVertex: str):
         super().__init__(label)
         self.rightVertex = rightVertex
         self.legs = []
@@ -144,29 +93,46 @@ class rightTriangle(Triangle):
 
     
     def areaByLegs(self):
+        """
+        Calculate the area based on the lengths of the legs.
+
+        This method iterates through the legs of the figure and checks for any NoneType lengths. If all lengths are valid, it calculates the area using the lengths of the first two legs. If any leg has a NoneType length, it returns a list of the legs that need further processing.
+        Returns:
+            If all lengths are valid, returns the calculated area.
+            If any leg has a NoneType length, returns a list of legs that need further processing.
+        """
         delegateFind = []
         for leg in self.legs:
             if type(FIGURES[leg].length).__name__ == "NoneType":
                 delegateFind.append(leg)
         if delegateFind == []:
-            self.Area = 0.5 * FIGURES[self.legs[0]].length * FIGURES[self.legs[1]].length
-            return self.Area
+            self.area = 0.5 * FIGURES[self.legs[0]].length * FIGURES[self.legs[1]].length
+            return self.area
         else:
             return delegateFind
     
-    def pythagorean(self, toFind):
+    def pythagorean(self, targetSide: str):
+        """
+        Calculate the missing side length of a right-angled triangle using the Pythagorean theorem. 
+
+        Args:
+            toFind: The side length to calculate.
+
+        Returns:
+            If the side length toFind is found, returns the length value. If not found, returns a list of sides to calculate.
+        """
         delegateFind = []
-        if toFind != self.hypotenuse:
-            if not valueKnown(self.legs[self.legs.index(toFind) ^ 1], "length"):
-                delegateFind.append(self.legs[self.legs.index(toFind) ^ 1])
+        if targetSide != self.hypotenuse:
+            if not valueKnown(self.legs[self.legs.index(targetSide) ^ 1], "length"):
+                delegateFind.append(self.legs[self.legs.index(targetSide) ^ 1])
             
             if not valueKnown(self.hypotenuse, "length"):
                 delegateFind.append(self.hypotenuse)
 
 
             if delegateFind == []:
-                FIGURES[toFind].length = math.sqrt(FIGURES[self.hypotenuse].length ** 2 - FIGURES[self.legs[self.legs.index(toFind) ^ 1]].length ** 2)
-                return FIGURES[toFind].length
+                FIGURES[targetSide].length = math.sqrt(FIGURES[self.hypotenuse].length ** 2 - FIGURES[self.legs[self.legs.index(targetSide) ^ 1]].length ** 2)
+                return FIGURES[targetSide].length
             else:
                 return delegateFind
         else:
@@ -177,17 +143,11 @@ class rightTriangle(Triangle):
 
 
             if delegateFind == []:
-                FIGURES[toFind].length = math.sqrt(FIGURES[self.legs[0]].length ** 2 + FIGURES[self.legs[1]].length ** 2)
-                return FIGURES[toFind].length
+                FIGURES[targetSide].length = math.sqrt(FIGURES[self.legs[0]].length ** 2 + FIGURES[self.legs[1]].length ** 2)
+                return FIGURES[targetSide].length
             else:
                 return delegateFind
 
 
-tri = rightTriangle("ABC", "C")
-tri2 = rightTriangle("BCD", "C")
-
-FIGURES["BD"].length = 5
-FIGURES["AC"].length = 3
-FIGURES["CD"].length = 3
-
-find("ABC")
+abc = Triangle("ABC")
+find("AB", "length")
