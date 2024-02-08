@@ -7,8 +7,8 @@ def translateByLabels(lst):
         res.append(item.label)
     return res
 
-def valueKnown(label, value):
-    return type(getattr(FIGURES[label], value)).__name__ != "NoneType"
+def attrKnown(label, attr):
+    return type(getattr(FIGURES[label], attr)).__name__ != "NoneType"
 
 def getClassNameByLabel(label: str):
     return FIGURES[label].__class__.__name__
@@ -16,32 +16,59 @@ def getClassNameByLabel(label: str):
 
 
 
-def find(target: str, attr: str):
+def find(target: str, attr: str = ""):
 
+    print("Finding ", target)
     targetType = getClassNameByLabel(target)
     parentFigures = []
     
+    if attr == "area":
+        parentFigures.append(target)
+
+    # в каких фигурах искать
     match targetType:
         case "Segment":
-            attr = "length"
+            attr = "sideLength"
 
             for figure in FIGURES:
-                if(isinstance(FIGURES[figure], Polygon)):
+                if isinstance(FIGURES[figure], Polygon) and set(target).issubset(set(figure)):
                     parentFigures.append(figure)
         
         case "Angle":
-            attr = "angle"
+            attr = "vertexAngle"
+            pass
+
+        case _:
             pass
     
-    
+    print(parentFigures)
 
+    # все отцовские фигуры
+    for parentFigure in parentFigures:
+        print("Searching in ", parentFigure)
+        # все методы
+        for method in FIGURES[parentFigure].ways[attr]:
+            print(f"Using {method} in {parentFigure}")
+            resOfFind = eval(f"FIGURES[parentFigure].{method}('{target}')")
+            
+    match type(resOfFind).__name__:
+        case "float":
+            print(f"Done! Answer is {resOfFind}")
+        case "list":
+            print(f"Need to find: {resOfFind}")
+
+                    
+
+
+        
+    
 FIGURES = {}
 
 
 class Segment():
     def __init__(self, label):
         self.label = label
-        self.length = None
+        self.length: float = None
 
         FIGURES[label] = self
 
@@ -63,14 +90,21 @@ class Polygon():
 
         # пути получения данных
         self.ways = {
-            "Angle": [],
-            "Segment": [],
-            "Area": []
+            "vertexAngle": [],
+            "sideLength": [],
+            "area": []
         }
 
 class Triangle(Polygon):
     def __init__(self, label):
         super().__init__(label)
+
+        self.ways["sideLength"].extend(["sinTheorem"])
+
+    def sinTheorem(self, toFind: str):
+        delegateFind = []
+
+        pass
 
 class isoscelesTriangle(Triangle):
     def __init__(self, label: str, baseSide: str):
@@ -88,11 +122,11 @@ class rightTriangle(Triangle):
             else:
                 self.hypotenuse = side
 
-        self.ways["Segment"].extend(["pythagorean"])
-        self.ways["Area"].extend(["areaByLegs"])
+        self.ways["sideLength"].extend(["pythagorean"])
+        self.ways["area"].extend(["areaByLegs"])
 
     
-    def areaByLegs(self):
+    def areaByLegs(self, any):
         """
         Calculate the area based on the lengths of the legs.
 
@@ -123,10 +157,10 @@ class rightTriangle(Triangle):
         """
         delegateFind = []
         if targetSide != self.hypotenuse:
-            if not valueKnown(self.legs[self.legs.index(targetSide) ^ 1], "length"):
+            if not attrKnown(self.legs[self.legs.index(targetSide) ^ 1], "length"):
                 delegateFind.append(self.legs[self.legs.index(targetSide) ^ 1])
             
-            if not valueKnown(self.hypotenuse, "length"):
+            if not attrKnown(self.hypotenuse, "length"):
                 delegateFind.append(self.hypotenuse)
 
 
@@ -138,7 +172,7 @@ class rightTriangle(Triangle):
         else:
             delegateFind = []
             for leg in self.legs:
-                if not valueKnown(leg, "length"):
+                if not attrKnown(leg, "length"):
                     delegateFind.append(leg)
 
 
@@ -149,5 +183,10 @@ class rightTriangle(Triangle):
                 return delegateFind
 
 
-abc = Triangle("ABC")
-find("AB", "length")
+abc = rightTriangle("ABC", "C")
+FIGURES["AC"].length = 4
+FIGURES["BC"].length = 3
+
+# abd = Triangle("ABD")
+
+find("AB")
