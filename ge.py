@@ -58,8 +58,15 @@ def findPath(goalTarget: str, goalAttr: str = ""):
         path: list
         path.reverse()
         
-
         print(*path, sep=" -> ")
+        
+        # INFERENCE
+        for method in path:
+            method: str
+            method = method.split("<")[0]
+            res = eval(method)
+        
+        print(res)
 
 def nextPathSegment():
     for path in PATHES:
