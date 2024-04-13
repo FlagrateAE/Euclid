@@ -1,3 +1,6 @@
+from utilFuncs import *
+
+
 class Segment():
     def __init__(self, label):
         self.label = label

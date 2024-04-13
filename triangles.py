@@ -1,5 +1,5 @@
 from basics import *
-
+from utilFuncs import *
 
 class Triangle(Polygon):
     def __init__(self, label):
@@ -40,16 +40,6 @@ class rightTriangle(Triangle):
         self.ways["area"].extend(["areaByLegs"])
 
     def areaByLegs(self, any):
-        """
-        Calculate the area of a figure based on the lengths of its legs.
-
-        Parameters:
-            self (obj): The object itself.
-            any: Any parameter.
-
-        Returns:
-            float: The area of the figure if the lengths of all legs are known, a dictionary containing the legs and their missing attributes otherwise.
-        """
 
         delegateFind = {}
         for leg in self.legs:
@@ -63,15 +53,6 @@ class rightTriangle(Triangle):
             return delegateFind
 
     def pythagorean(self, targetSide: str):
-        """
-        Calculate the missing side length of a right-angled triangle using the Pythagorean theorem. 
-
-        Args:
-            toFind: The side length to calculate.
-
-        Returns:
-            If the side length toFind is found, returns the length value. If not found, returns a list of sides to calculate.
-        """
 
         delegateFind = {}
         if targetSide != self.hypotenuse:
