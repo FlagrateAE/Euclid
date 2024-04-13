@@ -1,4 +1,4 @@
-from utilFuncs import *
+from utilities import *
 
 
 class Segment():

@@ -1,11 +1,7 @@
-import math
 from basics import *
 from triangles import *
-from utilFuncs import *
+from utilities import *
 
-
-
-FIGURES = {}
 
 
 # площадь с запутыванием

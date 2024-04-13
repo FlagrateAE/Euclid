@@ -1,3 +1,6 @@
+import math
+FIGURES = {}
+
 def translateByLabels(lst):
     res = []
     for item in lst:

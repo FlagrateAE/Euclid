@@ -1,5 +1,5 @@
 from basics import *
-from utilFuncs import *
+from utilities import *
 
 class Triangle(Polygon):
     def __init__(self, label):
