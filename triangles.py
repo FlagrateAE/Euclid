@@ -1,83 +1,65 @@
 from basics import *
 from utilities import *
 
+
 class Triangle(Polygon):
+    """Class representing a triangle
+
+    Parameters
+    ==========
+    `label`: string of three verticesꞋ names. Pass carefully as you wonꞋt be able to access the instance if label vertices are not in the order they were passed at initialization
+    """
+
     def __init__(self, label):
         super().__init__(label)
 
-        self.ways["length"].extend(["sideBySinTheorem"])
-        self.ways["area"].extend(["areaBySinTheorem"])
-
-    def sideBySinTheorem(self, targetSide: str):
-        delegateFind = []
-
-        pass
-
-    def areaBySinTheorem(self, toFind: str):
-        delegateFind = []
-
-        pass
-
 
 class isoscelesTriangle(Triangle):
-    def __init__(self, label: str, baseSide: str):
+    """Class representing an isosceles triangle - a triangle with two equal sides
+
+    Parameters:
+    ==========
+    `label`: string of three verticesꞋ names. Pass carefully as you wonꞋt be able to access the instance if label vertices are not in the order they were passed at initialization
+    `baseSide`: string label of the base side of the triangle (that one that does not equal to two others)
+
+    Example
+    =======
+    isoscelesTriangle("ABC", baseSide="AC") means AB = BC
+    """
+
+    def __init__(self, label, baseSide: str):
         super().__init__(label)
-        self.baseSide = baseSide
+        
+        self.baseSide = Segment(baseSide)
+        
+        # base side is always the last in the list
+        self.sides.remove(self.baseSide)
+        self.sides.append(self.baseSide)
+        
+        # formulas
+        self.formulas.append("self.sides[0], self.sides[1]")
+        
+        
 
+class rightTriangle(Polygon):
+    """Class representing a right triangle - a triangle with one angle that equals 90°
 
-class rightTriangle(Triangle):
+    Parameters:
+    ==========
+    `label`: string of three verticesꞋ names. Pass carefully as you wonꞋt be able to access the instance if label vertices are not in the order they were passed at initialization
+    `rightVertex`: name of the vertice hosting the right angle
+
+    Example
+    =======
+    rightTriangle("ABC", rightVertex="C") means angle C = 90°
+    """
+
     def __init__(self, label: str, rightVertex: str):
         super().__init__(label)
-        self.rightVertex = rightVertex
+        self.rightVertex = Point(rightVertex)
         self.legs = []
         for side in self.sides:
-            if self.rightVertex in side:
-                self.legs.append(side)
+            if rightVertex in side.label:
+                self.legs.append(Segment(side.label))
             else:
-                self.hypotenuse = side
-
-        self.ways["length"].extend(["pythagorean"])
-        self.ways["area"].extend(["areaByLegs"])
-
-    def areaByLegs(self, any):
-
-        delegateFind = {}
-        for leg in self.legs:
-            if not attrKnown(leg, "length"):
-                delegateFind[leg] = "length"
-        if delegateFind == {}:
-            self.area = 0.5 * FIGURES[self.legs[0]
-                                      ].length * FIGURES[self.legs[1]].length
-            return self.area
-        else:
-            return delegateFind
-
-    def pythagorean(self, targetSide: str):
-
-        delegateFind = {}
-        if targetSide != self.hypotenuse:
-            if not attrKnown(self.legs[self.legs.index(targetSide) ^ 1], "length"):
-                delegateFind[self.legs[self.legs.index(
-                    targetSide) ^ 1]] = "length"
-
-            if not attrKnown(self.hypotenuse, "length"):
-                delegateFind[self.hypotenuse] = "length"
-
-            if delegateFind == {}:
-                FIGURES[targetSide].length = math.sqrt(
-                    FIGURES[self.hypotenuse].length ** 2 - FIGURES[self.legs[self.legs.index(targetSide) ^ 1]].length ** 2)
-                return FIGURES[targetSide].length
-            else:
-                return delegateFind
-        else:
-            delegateFind = {}
-            for leg in self.legs:
-                if not attrKnown(leg, "length"):
-                    delegateFind[leg] = "length"
-
-            if delegateFind == {}:
-                FIGURES[targetSide].length = math.sqrt(
-                    FIGURES[self.legs[0]].length ** 2 + FIGURES[self.legs[1]].length ** 2)
-                return FIGURES[targetSide].length
-            else:
-                return delegateFind
+                self.hypotenuse = Segment(side.label)

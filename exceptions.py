@@ -1,0 +1,2 @@
+class LineDividedException(Exception):
+    pass

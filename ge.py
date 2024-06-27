@@ -1,22 +1,28 @@
+from utilities import *
 from basics import *
 from triangles import *
-from utilities import *
 
-
-
-# площадь с запутыванием
-# ack = rightTriangle("ACK", "K")
-# abc = rightTriangle("ABC", "C")
-# FIGURES["AB"].length = 5
-# FIGURES["BC"].length = 3
-# findPath("AC", "length")
-
-# катет через другой треугольник
-# abc = rightTriangle("ABC", "C")
-# abd = rightTriangle("ABD", "A")
-# FIGURES["AD"].length = 12
-# FIGURES["BD"].length = 13
-# FIGURES["BC"].length = 3
-# findPath("AC", "length")
-
-# простой тест пифагора
+def FIND(figure: Figure, target, attr: str = None):
+    """
+    Main function for this project. Starts a recursive search for the target of the geometric problem
+    
+    Parameters
+    ==========
+    `figure`: target figure
+    `attr`: attribute of the target figure to find
+    """
+    match type(figure).__name__:
+        case "Segment":
+            attr = "length"
+        case "Angle": 
+            attr = "angle"
+    
+    if attrKnown(figure, attr):
+        return attrKnown(figure, attr)
+    else:
+        if type(figure).__name__ == "Segment":
+            # each segment can be found in 3 ways: either as sum of subs, or as difference of other, or by a ratio
+            pass
+                       
+Segment("AB")
+print(Point("A"))
